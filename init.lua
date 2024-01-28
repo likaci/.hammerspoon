@@ -1,117 +1,64 @@
 -- auto reload
 hs.loadSpoon("ReloadConfiguration")
 spoon.ReloadConfiguration:start()
--- cli
-hs.ipc.cliInstall()
+
 -- disable animation
 hs.window.animationDuration = 0
 
--- right three quater / half / quater or expand to right
+local EPSILON = 2
+
+function setWindowFrame(window, xFactor, widthFactor)
+    local windowFrame = window:frame()
+    local screenFrame = window:screen():frame()
+    windowFrame.x = screenFrame.x + screenFrame.w * xFactor
+    windowFrame.y = screenFrame.y
+    windowFrame.w = screenFrame.w * widthFactor
+    windowFrame.h = screenFrame.h
+    window:setFrame(windowFrame)
+end
+
+-- Check if two floats are nearly equal
+function nearlyEqual(a, b)
+    return math.abs(a - b) < EPSILON
+end
+
+-- Get focused window and its frame and screen frame
+function getFocusedWindowInfo()
+    local window = hs.window.focusedWindow()
+    local windowFrame = window:frame()
+    local screenFrame = window:screen():frame()
+    return window, windowFrame, screenFrame
+end
+
+-- R2/3 or R1/3
 hs.hotkey.bind({"cmd", "ctrl"}, "L", function()
-    local window = hs.window.focusedWindow()
-    local windowFrame = window:frame()
-    local screenFrame = window:screen():frame()
-
-    if windowFrame.x == screenFrame.x then
-        -- from the left, try to extend to the right
-        if windowFrame.w < screenFrame.w * 0.49 then
-            print("left 0.5")
-            windowFrame.w = screenFrame.w * 0.5
-        else
-            print("right 0.66")
-            windowFrame.w = screenFrame.w * 0.66
-            windowFrame.x = screenFrame.x + screenFrame.w * 0.34
-        end
+    local window, windowFrame, screenFrame = getFocusedWindowInfo()
+    if nearlyEqual((windowFrame.x + windowFrame.w), (screenFrame.x + screenFrame.w)) and
+        nearlyEqual(windowFrame.w, screenFrame.w * 0.66) then
+        print("L, R2/3 -> R1/3")
+        setWindowFrame(window, 0.66, 0.34)
     else
-        if (windowFrame.x + windowFrame.w) < (screenFrame.x + screenFrame.w - 1) then
-            print("right 0.66")
-            windowFrame.x = screenFrame.x + screenFrame.w * 0.34
-            windowFrame.w = screenFrame.w * 0.66
-        elseif windowFrame.w > screenFrame.w * 0.67 then
-            print("right 0.66")
-            windowFrame.x = screenFrame.x + screenFrame.w * 0.34
-            windowFrame.w = screenFrame.w * 0.66
-        elseif windowFrame.w > screenFrame.w * 0.51 then
-            print("right 0.5")
-            windowFrame.x = screenFrame.x + screenFrame.w * 0.5
-            windowFrame.w = screenFrame.w * 0.5
-        elseif windowFrame.w > screenFrame.w * 0.35 then
-            print("right 0.34")
-            windowFrame.x = screenFrame.x + screenFrame.w * 0.66
-            windowFrame.w = screenFrame.w * 0.34
-        else
-            print("right 0.66")
-            windowFrame.x = screenFrame.x + screenFrame.w * 0.34
-            windowFrame.w = screenFrame.w * 0.66
-        end
+        print("L, -> R2/3")
+        setWindowFrame(window, 0.34, 0.66)
     end
-    windowFrame.y = screenFrame.y
-    windowFrame.h = screenFrame.h
-    window:setFrame(windowFrame)
 end)
 
--- left half or quater or expant to left
+-- L2/3 or L1/3
 hs.hotkey.bind({"cmd", "ctrl"}, "H", function()
-    local window = hs.window.focusedWindow()
-    local windowFrame = window:frame()
-    local screenFrame = window:screen():frame()
-
-    if (windowFrame.x + windowFrame.w) >= (screenFrame.x + screenFrame.w - 1) then
-        if windowFrame.w < screenFrame.w * 0.26 then
-            print("right 0.5")
-            windowFrame.x = screenFrame.x + screenFrame.w * 0.5
-            windowFrame.w = screenFrame.w * 0.5
-        elseif windowFrame.w < screenFrame.w * 0.51 then
-            print("right 0.66")
-            windowFrame.x = screenFrame.x + screenFrame.w * 0.34
-            windowFrame.w = screenFrame.w * 0.66
-        else
-            print("left 0.5")
-            windowFrame.x = screenFrame.x
-            windowFrame.w = screenFrame.w * 0.5
-        end
+    local window, windowFrame, screenFrame = getFocusedWindowInfo()
+    if nearlyEqual(windowFrame.x, screenFrame.x) and nearlyEqual(windowFrame.w, screenFrame.w * 0.66) then
+        print("R, L2/3 -> L1/3")
+        setWindowFrame(window, 0, 0.34)
     else
-        windowFrame.x = screenFrame.x
-        if windowFrame.w > screenFrame.w * 0.5 then
-            print("left 0.5")
-            windowFrame.w = screenFrame.w * 0.5
-        elseif windowFrame.w > screenFrame.w * 0.35 then
-            print("left 0.34")
-            windowFrame.w = screenFrame.w * 0.34
-        else
-            print("left 0.5")
-            windowFrame.w = screenFrame.w * 0.5
-        end
+        print("R, -> L2/3")
+        setWindowFrame(window, 0, 0.66)
     end
-
-    windowFrame.y = screenFrame.y
-    windowFrame.h = screenFrame.h
-    window:setFrame(windowFrame)
-
 end)
 
--- full screen or top/bottom half
+-- full screen
 hs.hotkey.bind({"cmd", "ctrl"}, "K", function()
     local window = hs.window.focusedWindow()
-    local windowFrame = window:frame()
-    local screenFrame = window:screen():frame()
-
-    if windowFrame.w == screenFrame.w and windowFrame.h == screenFrame.h then
-        -- full screen to top half
-        windowFrame.h = screenFrame.h * 0.5
-    elseif windowFrame.x == screenFrame.x and windowFrame.y == screenFrame.y and
-        (math.abs(windowFrame.h - screenFrame.h * 0.5) <= 1) then
-        -- top half to bottom half
-        windowFrame.y = screenFrame.y + screenFrame.h * 0.5
-    else
-        -- to full screen
-        windowFrame.w = screenFrame.w
-        windowFrame.h = screenFrame.h
-        windowFrame.x = screenFrame.x
-        windowFrame.y = screenFrame.y
-    end
-    window:setFrame(windowFrame)
-
+    setWindowFrame(window, 0, 1)
 end)
 
 -- move to next screen
@@ -120,70 +67,56 @@ hs.hotkey.bind({"cmd", "ctrl"}, "J", function()
     window:moveToScreen(window:screen():next())
 end)
 
-function window12()
-    local window = hs.window.focusedWindow()
-    print(window)
-    local windowFrame = window:frame()
-    local screenFrame = window:screen():frame()
-
-    windowFrame.x = screenFrame.x + screenFrame.w * 0.34
-    windowFrame.y = screenFrame.y
-    windowFrame.w = screenFrame.w * 0.66
-    windowFrame.h = screenFrame.h
-    window:setFrame(windowFrame)
-
-    local preWindow = hs.window.orderedWindows()[2]
-    local preWindowFrame = preWindow:frame()
-    print(preWindow)
-    preWindowFrame.x = screenFrame.x
-    preWindowFrame.y = screenFrame.y
-    preWindowFrame.w = screenFrame.w * 0.34
-    preWindowFrame.h = screenFrame.h
-    preWindow:setFrame(preWindowFrame)
-end
-
-function window21()
-    local window = hs.window.focusedWindow()
-    local windowFrame = window:frame()
-    local screenFrame = window:screen():frame()
-
-    windowFrame.x = screenFrame.x
-    windowFrame.y = screenFrame.y
-    windowFrame.w = screenFrame.w * 0.34
-    windowFrame.h = screenFrame.h
-    window:setFrame(windowFrame)
-
-    local preWindow = hs.window.orderedWindows()[2]
-    local preWindowFrame = preWindow:frame()
-
-    preWindowFrame.x = screenFrame.x + screenFrame.w * 0.34
-    preWindowFrame.y = screenFrame.y
-    preWindowFrame.w = screenFrame.w * 0.66
-    prewWindowFrame.h = screenFrame.h
-    preWindow:setFrame(preWindowFrame)
-
-end
-
-hs.hotkey.bind({"alt"}, "H", function()
-    hs.eventtap.keyStroke({}, 'left')
-end)
-hs.hotkey.bind("alt", "J", function()
-    hs.eventtap.keyStroke({}, 'down')
-end)
-hs.hotkey.bind("alt", "K", function()
-    hs.eventtap.keyStroke({}, 'up')
-end)
-hs.hotkey.bind("alt", "L", function()
-    hs.eventtap.keyStroke({}, 'right')
+-- move chrome tab to new window
+hs.hotkey.bind({"cmd", "ctrl"}, 'N', function()
+    local chrome = hs.appfinder.appFromName("Google Chrome")
+    chrome:selectMenuItem({"Tab", "Move Tab to New Window"})
 end)
 
-hs.hotkey.bind("cmd", "Q", function()
-    print("cmd q")
-    if hs.application.frontmostApplication():bundleID() == "com.apple.mail" then
-        print("cmd w")
-        hs.eventtap.keyStroke({"cmd"}, 'W')
+-- dump
+function dump(o)
+    if type(o) == 'table' then
+        local s = '{ '
+        for k, v in pairs(o) do
+            if type(k) ~= 'number' then
+                k = '"' .. k .. '"'
+            end
+            s = s .. '[' .. k .. '] = ' .. dump(v) .. ','
+        end
+        return s .. '} '
     else
-        print("cmd q2")
-        hs.eventtap.keyStroke({"cmd"}, 'Q')
+        return tostring(o)
     end
+end
+
+-- remap
+local function keyStrokeFun(mods, key)
+    return function()
+        hs.eventtap.keyStroke(mods, key, 1000)
+    end
+end
+local function remap(mods, key, pressFn)
+    hs.hotkey.bind(mods, key, pressFn, nil, pressFn)
+end
+
+-- vi navigation
+remap({'alt'}, 'H', keyStrokeFun({}, 'left'))
+remap({'alt'}, 'J', keyStrokeFun({}, 'down'))
+remap({'alt'}, 'K', keyStrokeFun({}, 'up'))
+remap({'alt'}, 'L', keyStrokeFun({}, 'right'))
+
+-- keep Mail alive for AltServer
+local mapCmdQ2CmdW = hs.hotkey.new({'cmd'}, 'Q', function()
+    hs.eventtap.keyStroke({"cmd"}, "W")
 end)
+function applicationWatcher(appName, eventType, appObject)
+    if (appName == "Mail" or appName == "邮件") then
+        if (eventType == hs.application.watcher.activated) then
+            mapCmdQ2CmdW:enable()
+        elseif (eventType == hs.application.watcher.deactivated) then
+            mapCmdQ2CmdW:disable()
+        end
+    end
+end
+appWatcher = hs.application.watcher.new(applicationWatcher)
+appWatcher:start()

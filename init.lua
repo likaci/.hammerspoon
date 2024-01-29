@@ -33,10 +33,17 @@ end
 -- R2/3 or R1/3
 hs.hotkey.bind({"cmd", "ctrl"}, "L", function()
     local window, windowFrame, screenFrame = getFocusedWindowInfo()
-    if nearlyEqual((windowFrame.x + windowFrame.w), (screenFrame.x + screenFrame.w)) and
-        nearlyEqual(windowFrame.w, screenFrame.w * 0.66) then
-        print("L, R2/3 -> R1/3")
-        setWindowFrame(window, 0.66, 0.34)
+    if nearlyEqual((windowFrame.x + windowFrame.w), (screenFrame.x + screenFrame.w)) then
+        if nearlyEqual(windowFrame.w, screenFrame.w * 0.66) then
+            print("L, R2/3 -> R1/2")
+            setWindowFrame(window, 0.5, 0.5)
+        elseif nearlyEqual(windowFrame.w, screenFrame.w * 0.5) then
+            print("L, R1/2 -> R1/3")
+            setWindowFrame(window, 0.66, 0.34)
+        else
+            print("L, -> R2/3")
+            setWindowFrame(window, 0.34, 0.66)
+        end
     else
         print("L, -> R2/3")
         setWindowFrame(window, 0.34, 0.66)
@@ -46,9 +53,17 @@ end)
 -- L2/3 or L1/3
 hs.hotkey.bind({"cmd", "ctrl"}, "H", function()
     local window, windowFrame, screenFrame = getFocusedWindowInfo()
-    if nearlyEqual(windowFrame.x, screenFrame.x) and nearlyEqual(windowFrame.w, screenFrame.w * 0.66) then
-        print("R, L2/3 -> L1/3")
-        setWindowFrame(window, 0, 0.34)
+    if nearlyEqual(windowFrame.x, screenFrame.x) then
+        if nearlyEqual(windowFrame.w, screenFrame.w * 0.66) then
+            print("R, L2/3 -> L1/3")
+            setWindowFrame(window, 0, 0.5)
+        elseif nearlyEqual(windowFrame.w, screenFrame.w * 0.5) then
+            print("R, L1/2 -> L1/3")
+            setWindowFrame(window, 0, 0.34)
+        else
+            print("R, -> L2/3")
+            setWindowFrame(window, 0, 0.66)
+        end
     else
         print("R, -> L2/3")
         setWindowFrame(window, 0, 0.66)

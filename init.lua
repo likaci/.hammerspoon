@@ -120,18 +120,18 @@ remap({'alt'}, 'J', keyStrokeFun({}, 'down'))
 remap({'alt'}, 'K', keyStrokeFun({}, 'up'))
 remap({'alt'}, 'L', keyStrokeFun({}, 'right'))
 
--- keep Mail alive for AltServer
-local mapCmdQ2CmdW = hs.hotkey.new({'cmd'}, 'Q', function()
-    hs.eventtap.keyStroke({"cmd"}, "W")
-end)
-function applicationWatcher(appName, eventType, appObject)
-    if (appName == "Mail" or appName == "邮件") then
-        if (eventType == hs.application.watcher.activated) then
-            mapCmdQ2CmdW:enable()
-        elseif (eventType == hs.application.watcher.deactivated) then
-            mapCmdQ2CmdW:disable()
-        end
-    end
-end
-appWatcher = hs.application.watcher.new(applicationWatcher)
-appWatcher:start()
+-- -- keep Mail alive for AltServer
+-- local mapCmdQ2CmdW = hs.hotkey.new({'cmd'}, 'Q', function()
+--     hs.eventtap.keyStroke({"cmd"}, "W")
+-- end)
+-- function applicationWatcher(appName, eventType, appObject)
+--     if (appName == "Mail" or appName == "邮件") then
+--         if (eventType == hs.application.watcher.activated) then
+--             mapCmdQ2CmdW:enable()
+--         elseif (eventType == hs.application.watcher.deactivated) then
+--             mapCmdQ2CmdW:disable()
+--         end
+--     end
+-- end
+-- appWatcher = hs.application.watcher.new(applicationWatcher)
+-- appWatcher:start()
